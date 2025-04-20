@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boxing Glove Monitor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #000;
+      color: #fff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #333;
+    }
+    h1 {
+      margin: 0;
+      color: #ffd700;
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+    .status-indicator {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    .connected {
+      background-color: #4CAF50;
+    }
+    .disconnected {
+      background-color: #F44336;
+    }
+    .card {
+      background-color: #111;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #333;
+    }
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #ffd700;
+      font-size: 18px;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .data-label {
+      color: #aaa;
+    }
+    .data-value {
+      font-weight: bold;
+      color: #fff;
+    }
+    .data-value.highlight {
+      color: #ffd700;
+    }
+    .button {
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #ffd700;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s;
+    }
+    .button:hover {
+      background-color: #444;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+    }
+    .progress-bar {
+      height: 10px;
+      background-color: #333;
+      border-radius: 5px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background-color: #ffd700;
+      transition: width 0.3s ease;
+    }
+    .log-container {
+      height: 200px;
+      overflow-y: auto;
+      background-color: #111;
+      border: 1px solid #333;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin-bottom: 4px;
+      border-bottom: 1px solid #222;
+      padding-bottom: 4px;
+    }
+    .timestamp {
+      color: #888;
+      font-size: 11px;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Boxing Glove Monitor</h1>
+      <div class="status">
+        <div id="statusIndicator" class="status-indicator disconnected"></div>
+        <span id="statusText">Disconnected</span>
+      </div>
+      <div class="button-group">
+        <button id="reconnectBtn" class="button">Reconnect</button>
+        <button id="mockDataBtn" class="button">Toggle Mock Data</button>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Heart Rate</h2>
+        <div class="data-row">
+          <span class="data-label">Current:</span>
+          <span id="heartRate" class="data-value highlight">--</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Zone:</span>
+          <span id="heartRateZone" class="data-value">--</span>
+        </div>
+        <div class="progress-bar">
+          <div id="heartRateBar" class="progress-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Force Sensors</h2>
+        <div class="data-row">
+          <span class="data-label">Index Finger:</span>
+          <span id="fsrIndex" class="data-value">--</span>
+        </div>
+        <div class="progress-bar">
+          <div id="fsrIndexBar" class="progress-fill" style="width: 0%"></div>
+        </div>
+        
+        <div class="data-row" style="margin-top: 10px;">
+          <span class="data-label">Middle Finger:</span>
+          <span id="fsrMiddle" class="data-value">--</span>
+        </div>
+        <div class="progress-bar">
+          <div id="fsrMiddleBar" class="progress-fill" style="width: 0%"></div>
+        </div>
+        
+        <div class="data-row" style="margin-top: 10px;">
+          <span class="data-label">Impact Sensor:</span>
+          <span id="fsrImpact" class="data-value">--</span>
+        </div>
+        <div class="progress-bar">
+          <div id="fsrImpactBar" class="progress-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Accelerometer</h2>
+        <div class="data-row">
+          <span class="data-label">X-axis:</span>
+          <span id="accelX" class="data-value">--</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Y-axis:</span>
+          <span id="accelY" class="data-value">--</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Z-axis:</span>
+          <span id="accelZ" class="data-value">--</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Performance</h2>
+        <div class="data-row">
+          <span class="data-label">Punches Detected:</span>
+          <span id="punchCount" class="data-value highlight">--</span>
+        </div>
+        <div class="data-row">
+          <span class="data-label">Last Update:</span>
+          <span id="lastUpdate" class="data-value">--</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Data Log</h2>
+      <div id="logContainer" class="log-container"></div>
+    </div>
+  </div>
+
+  <script>
+    // DOM elements
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusText = document.getElementById('statusText');
+    const reconnectBtn = document.getElementById('reconnectBtn');
+    const mockDataBtn = document.getElementById('mockDataBtn');
+    const heartRate = document.getElementById('heartRate');
+    const heartRateZone = document.getElementById('heartRateZone');
+    const heartRateBar = document.getElementById('heartRateBar');
+    const fsrIndex = document.getElementById('fsrIndex');
+    const fsrIndexBar = document.getElementById('fsrIndexBar');
+    const fsrMiddle = document.getElementById('fsrMiddle');
+    const fsrMiddleBar = document.getElementById('fsrMiddleBar');
+    const fsrImpact = document.getElementById('fsrImpact');
+    const fsrImpactBar = document.getElementById('fsrImpactBar');
+    const accelX = document.getElementById('accelX');
+    const accelY = document.getElementById('accelY');
+    const accelZ = document.getElementById('accelZ');
+    const punchCount = document.getElementById('punchCount');
+    const lastUpdate = document.getElementById('lastUpdate');
+    const logContainer = document.getElementById('logContainer');
+
+    // WebSocket connection
+    let socket;
+    let isConnected = false;
+
+    // Connect to WebSocket
+    function connectWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}`;
+      
+      socket = new WebSocket(wsUrl);
+      
+      socket.onopen = () => {
+        console.log('WebSocket connected');
+        addLogEntry('WebSocket connected');
+      };
+      
+      socket.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          
+          if (message.type === 'status') {
+            updateStatus(message.connected, message.message);
+          } else if (message.type === 'data') {
+            updateData(message.data, message.timestamp);
+          }
+          
+          addLogEntry(`Received: ${JSON.stringify(message).substring(0, 100)}...`);
+        } catch (err) {
+          console.error('Error parsing message:', err);
+          addLogEntry(`Error parsing message: ${err.message}`);
+        }
+      };
+      
+      socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        updateStatus(false, 'WebSocket error');
+        addLogEntry(`WebSocket error: ${error}`);
+      };
+      
+      socket.onclose = () => {
+        console.log('WebSocket closed');
+        updateStatus(false, 'WebSocket disconnected');
+        addLogEntry('WebSocket closed');
+        
+        // Try to reconnect after a delay
+        setTimeout(connectWebSocket, 3000);
+      };
+    }
+
+    // Update connection status
+    function updateStatus(connected, message) {
+      isConnected = connected;
+      
+      if (connected) {
+        statusIndicator.className = 'status-indicator connected';
+        statusText.textContent = message || 'Connected';
+      } else {
+        statusIndicator.className = 'status-indicator disconnected';
+        statusText.textContent = message || 'Disconnected';
+      }
+    }
+
+    // Update data display
+    function updateData(data, timestamp) {
+      // Format timestamp
+      const time = new Date(timestamp).toLocaleTimeString();
+      lastUpdate.textContent = time;
+      
+      // Update heart rate
+      if (data.heartRate !== undefined) {
+        heartRate.textContent = `${data.heartRate} BPM`;
+        heartRateBar.style.width = `${Math.min(100, data.heartRate / 2)}%`;
+        heartRateZone.textContent = getHeartRateZone(data.heartRate);
+      }
+      
+      // Update force sensors
+      if (data.fsrIndex !== undefined) {
+        const indexPercent = normalizeValue(data.fsrIndex);
+        fsrIndex.textContent = `${indexPercent}%`;
+        fsrIndexBar.style.width = `${indexPercent}%`;
+      }
+      
+      if (data.fsrMiddle !== undefined) {
+        const middlePercent = normalizeValue(data.fsrMiddle);
+        fsrMiddle.textContent = `${middlePercent}%`;
+        fsrMiddleBar.style.width = `${middlePercent}%`;
+      }
+      
+      if (data.fsrImpact !== undefined) {
+        const impactPercent = normalizeValue(data.fsrImpact);
+        fsrImpact.textContent = `${impactPercent}%`;
+        fsrImpactBar.style.width = `${impactPercent}%`;
+      }
+      
+      // Update accelerometer
+      if (data.accelerometer) {
+        accelX.textContent = data.accelerometer.x !== undefined ? data.accelerometer.x.toFixed(2) : '--';
+        accelY.textContent = data.accelerometer.y !== undefined ? data.accelerometer.y.toFixed(2) : '--';
+        accelZ.textContent = data.accelerometer.z !== undefined ? data.accelerometer.z.toFixed(2) : '--';
+      }
+      
+      // Update punch count
+      if (data.punchCount !== undefined) {
+        punchCount.textContent = data.punchCount;
+      }
+      
+      // Handle raw data
+      if (data.raw) {
+        addLogEntry(`Raw data: ${data.raw}`);
+      }
+    }
+
+    // Normalize FSR values to percentage
+    function normalizeValue(val) {
+      if (val > 100) {
+        return Math.min(100, Math.round((val / 1023) * 100));
+      }
+      return Math.round(val);
+    }
+
+    // Get heart rate zone
+    function getHeartRateZone(hr) {
+      if (hr < 60) return "Resting";
+      if (hr < 110) return "Warm Up";
+      if (hr < 140) return "Fat Burn";
+      if (hr < 170) return "Cardio";
+      return "Peak";
+    }
+
+    // Add entry to log
+    function addLogEntry(message) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      
+      const timestamp = document.createElement('span');
+      timestamp.className = 'timestamp';
+      timestamp.textContent = new Date().toLocaleTimeString();
+      
+      entry.appendChild(timestamp);
+      entry.appendChild(document.createTextNode(message));
+      
+      logContainer.appendChild(entry);
+      logContainer.scrollTop = logContainer.scrollHeight;
+      
+      // Limit log entries
+      while (logContainer.children.length > 100) {
+        logContainer.removeChild(logContainer.firstChild);
+      }
+    }
+
+    // Event listeners
+    reconnectBtn.addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+          type: 'command',
+          command: 'reconnect'
+        }));
+        addLogEntry('Sent reconnect command');
+      }
+    });
+
+    mockDataBtn.addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+          type: 'command',
+          command: 'toggleMock'
+        }));
+        addLogEntry('Sent toggle mock data command');
+      }
+    });
+
+    // Initialize
+    connectWebSocket();
+    addLogEntry('Application started');
+  </script>
+</body>
+</html>
