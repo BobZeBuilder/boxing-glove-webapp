@@ -28,30 +28,30 @@ export default function SerialMonitorPage() {
   }, [error, toast])
 
   return (
-    <div className="bg-[#2f2b2a] container mx-auto py-6">
-      <div className="bg-[#2f2b2a] flex flex-col space-y-6">
-        <div className="bg-[#2f2b2a] flex items-center justify-between">
+    <div className="container mx-auto py-6">
+      <div className="flex flex-col space-y-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-yellow-500 text-3xl font-bold">Serial Monitor</h1>
-            <p className="text-yellow-500 text-muted-foreground">Monitor and debug your Arduino boxing glove sensors</p>
+            <h1 className="text-3xl font-bold">Serial Monitor</h1>
+            <p className="text-muted-foreground">Monitor and debug your Arduino boxing glove sensors</p>
           </div>
           <ConnectionStatus status={connectionStatus} />
         </div>
 
-        <div className="bg-[#121212] grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-[#121212] md:col-span-3">
-            <Tabs defaultValue="dashboard" className="text-yellow-500 w-full">
-              <TabsList className="bg-[#2f2b2a] grid grid-cols-3 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="md:col-span-3">
+            <Tabs defaultValue="dashboard" className="w-full">
+              <TabsList className="grid grid-cols-3 mb-4">
                 <TabsTrigger value="dashboard">
-                  <Activity className="text-yellow-500 mr-2 h-4 w-4" />
+                  <Activity className="mr-2 h-4 w-4" />
                   Dashboard
                 </TabsTrigger>
                 <TabsTrigger value="raw">
-                  <Terminal className="text-yellow-500 mr-2 h-4 w-4" />
+                  <Terminal className="mr-2 h-4 w-4" />
                   Raw Data
                 </TabsTrigger>
                 <TabsTrigger value="debug">
-                  <Cpu className="text-yellow-500 mr-2 h-4 w-4" />
+                  <Cpu className="mr-2 h-4 w-4" />
                   Debug
                 </TabsTrigger>
               </TabsList>
@@ -70,16 +70,16 @@ export default function SerialMonitorPage() {
             </Tabs>
           </div>
 
-          <div className="bg-[#121212] space-y-6">
+          <div className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Zap className="text-yellow-500 mr-2 h-5 w-5" />
+                  <Zap className="mr-2 h-5 w-5" />
                   Connection
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-yellow-500 space-y-2">
+                <div className="space-y-2">
                   <Button onClick={connect} className="w-full" disabled={connectionStatus === "connected"}>
                     Connect
                   </Button>
@@ -104,17 +104,17 @@ export default function SerialMonitorPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <BarChart2 className="text-yellow-500 mr-2 h-5 w-5" />
+                  <BarChart2 className="mr-2 h-5 w-5" />
                   Stats
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-yellow-500 text-muted-foreground">Messages:</span>
+                  <span className="text-muted-foreground">Messages:</span>
                   <span>{rawMessages.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-yellow-500 text-muted-foreground">Max Force:</span>
+                  <span className="text-muted-foreground">Max Force:</span>
                   <span>{Math.max(data?.fsrIndex || 0, data?.fsrMiddle || 0, data?.fsrImpact || 0)}</span>
                 </div>
               </CardContent>
