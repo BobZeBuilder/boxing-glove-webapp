@@ -14,7 +14,6 @@ export interface SerialData {
     y: number
     z: number
   }
-  punchCount: number
   timestamp: string
 }
 
@@ -163,7 +162,6 @@ export function useSerialData() {
             y: Math.floor(Math.random() * 200 - 100) / 10,
             z: Math.floor(Math.random() * 200 - 100) / 10,
           },
-          punchCount: data ? data.punchCount + (Math.random() > 0.7 ? 1 : 0) : Math.floor(Math.random() * 10),
           timestamp: new Date().toISOString(),
         }
 

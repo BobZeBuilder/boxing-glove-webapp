@@ -125,7 +125,6 @@ function startMockData() {
         y: Math.floor(Math.random() * 200 - 100) / 10,
         z: Math.floor(Math.random() * 200 - 100) / 10,
       },
-      punchCount: Math.floor(Math.random() * 50),
     }
 
     broadcastData(mockData)

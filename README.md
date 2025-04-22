@@ -63,7 +63,6 @@ The monitor expects JSON data from the Arduino in this format:
     "y": -1.2,
     "z": 9.8
   },
-  "punchCount": 12
 }
 \`\`\`
 

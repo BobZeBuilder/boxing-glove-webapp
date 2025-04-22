@@ -95,10 +95,6 @@ export function SensorReadings({ data }: SensorReadingsProps) {
             </div>
           </div>
           <div className="space-y-1">
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Punches Detected</span>
-              <span className="font-medium">{data.punchCount}</span>
-            </div>
           </div>
         </CardContent>
       </Card>

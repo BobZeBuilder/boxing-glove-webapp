@@ -206,10 +206,6 @@
       <div class="card">
         <h2>Performance</h2>
         <div class="data-row">
-          <span class="data-label">Punches Detected:</span>
-          <span id="punchCount" class="data-value highlight">--</span>
-        </div>
-        <div class="data-row">
           <span class="data-label">Last Update:</span>
           <span id="lastUpdate" class="data-value">--</span>
         </div>
@@ -240,7 +236,6 @@
     const accelX = document.getElementById('accelX');
     const accelY = document.getElementById('accelY');
     const accelZ = document.getElementById('accelZ');
-    const punchCount = document.getElementById('punchCount');
     const lastUpdate = document.getElementById('lastUpdate');
     const logContainer = document.getElementById('logContainer');
 
@@ -344,12 +339,7 @@
         accelY.textContent = data.accelerometer.y !== undefined ? data.accelerometer.y.toFixed(2) : '--';
         accelZ.textContent = data.accelerometer.z !== undefined ? data.accelerometer.z.toFixed(2) : '--';
       }
-      
-      // Update punch count
-      if (data.punchCount !== undefined) {
-        punchCount.textContent = data.punchCount;
-      }
-      
+           
       // Handle raw data
       if (data.raw) {
         addLogEntry(`Raw data: ${data.raw}`);
