@@ -114,10 +114,6 @@ export default function SerialMonitorPage() {
                   <span>{rawMessages.length}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Punches:</span>
-                  <span>{data?.punchCount || 0}</span>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-muted-foreground">Max Force:</span>
                   <span>{Math.max(data?.fsrIndex || 0, data?.fsrMiddle || 0, data?.fsrImpact || 0)}</span>
                 </div>
