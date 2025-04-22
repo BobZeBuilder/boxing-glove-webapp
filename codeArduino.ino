@@ -15,7 +15,7 @@ MPU6050 mpu;
 PulseSensorPlayground pulseSensor;
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);  // Updated baud rate
   Wire.begin();
 
   // Initialize MPU6050
@@ -56,5 +56,5 @@ void loop() {
   Serial.print("\"heartRate\":"); Serial.print(bpm);
   Serial.println("}");
 
-  delay(100);  // adjust as needed
+  delay(100);  // 10 samples per second
 }
