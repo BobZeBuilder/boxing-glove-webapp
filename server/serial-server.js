@@ -1,9 +1,9 @@
-import { SerialPort } from "serialport"
-import { ReadlineParser } from "@serialport/parser-readline"
-import express from "express"
-import { createServer } from "http"
-import { WebSocketServer } from "ws"
-import cors from "cors"
+const { SerialPort } = require("serialport");
+const { ReadlineParser } = require("@serialport/parser-readline");
+const express = require("express");
+const { createServer } = require("http");
+const { WebSocketServer } = require("ws");
+const cors = require("cors");
 
 // Create Express app
 const app = express()
@@ -16,7 +16,7 @@ const clients = new Set()
 
 // Serial port configuration
 const PORT = process.env.PORT || 3001
-const SERIAL_PORT = process.env.SERIAL_PORT || "COM3" // Change this to match your Arduino port
+const SERIAL_PORT = process.env.SERIAL_PORT || "/dev/cu.usbmodem123456781" // Change this to match your Arduino port
 const BAUD_RATE = Number.parseInt(process.env.BAUD_RATE || "115200", 10)
 
 let serialPort
@@ -24,28 +24,24 @@ let mockInterval = null
 
 // Function to initialize serial port
 function initSerialPort() {
-  try {
-    serialPort = new SerialPort({
-      path: SERIAL_PORT,
-      baudRate: BAUD_RATE,
-    })
+  serialPort = new SerialPort({
+    path: SERIAL_PORT,
+    baudRate: BAUD_RATE
+  });
 
-    const parser = serialPort.pipe(new ReadlineParser({ delimiter: "\n" }))
+  // On "open", we had to assert the DTR: which was the BUG that forced us to use the Arduino-IDE
+  serialPort.on("open", () => {
+    console.log(`Serial port ${SERIAL_PORT} opened`);
 
-    serialPort.on("open", () => {
-      console.log(`Serial port ${SERIAL_PORT} opened at ${BAUD_RATE} baud`)
+    // 1. assert DTR:
+    serialPort.set({ dtr: true }, err => {
+      if (err) console.error("Failed to assert DTR:", err.message);
+      else console.log("DTR asserted");
+    });
 
-      // Stop mock data if it's running
-      if (mockInterval) {
-        clearInterval(mockInterval)
-        mockInterval = null
-      }
-
-      // Notify all clients
-      broadcastStatus(true, `Connected to ${SERIAL_PORT}`)
-    })
-
-    parser.on("data", (data) => {
+    // 2. DTR is high -> so attach the parser:
+    const parser = serialPort.pipe(new ReadlineParser({ delimiter: "\r\n" }));
+    parser.on("data", data => {
       try {
         // Try to parse as JSON
         const jsonData = JSON.parse(data)
@@ -55,22 +51,20 @@ function initSerialPort() {
         console.log("Raw data:", data)
         broadcastData({ raw: data.trim() })
       }
-    })
+      // console.log("Received", data);
+    });
 
-    serialPort.on("error", (err) => {
-      console.error("Serial port error:", err.message)
-      broadcastStatus(false, `Error: ${err.message}`)
-    })
+    // 3. Any other on-open logic (status notifications, clearing mocks…)
+  });
 
-    serialPort.on("close", () => {
-      console.log("Serial port closed")
-      broadcastStatus(false, "Disconnected")
-    })
-  } catch (err) {
-    console.error("Failed to open serial port:", err.message)
-    broadcastStatus(false, `Failed to open port: ${err.message}`)
-  }
+  serialPort.on("error", err => {
+    console.error("Serial error:", err.message);
+  });
+  serialPort.on("close", () => {
+    console.log("Serial port closed");
+  });
 }
+
 
 // Function to broadcast data to all connected clients
 function broadcastData(data) {
