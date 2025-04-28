@@ -10,7 +10,7 @@ import { ForceDistributionChart } from "@/components/force-distribution-chart"
 import { useSerialData } from "@/hooks/use-serial-data"
 
 export default function DashboardPage() {
-  const { data, connectionStatus } = useSerialData()
+  const { data, rawMessages, connectionStatus, error, connect, disconnect, toggleMockData } = useSerialData()
   const [sessionTime, setSessionTime] = useState(0)
   var totalPunches:number = 0;
   useEffect(() => {
@@ -114,6 +114,11 @@ export default function DashboardPage() {
 
           <Card className="border-gold/20 bg-black text-white">
             <CardHeader>
+                <div>
+                    <Button onClick={toggleMockData} variant="secondary" className="w-full">
+                    Toggle Mock Data
+                    </Button>
+                </div>
               <CardTitle className="text-gold">Heart Rate</CardTitle>
               <CardDescription className="text-white/70">
                 Current: {data?.heartRate || 0} BPM - Zone: {data?.heartRate || "Resting"}

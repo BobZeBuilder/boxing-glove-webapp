@@ -88,7 +88,7 @@ function drawGlove(ctx: CanvasRenderingContext2D, width: number, height: number)
   ctx.fillStyle = "#FFFFFF"
   ctx.fillText("Index", startX + gloveWidth * 0.3, startY + gloveHeight * 0.15)
   ctx.fillText("Middle", startX + gloveWidth * 0.5, startY + gloveHeight * 0.15)
-  ctx.fillText("Impact", startX + gloveWidth * 0.5, startY + gloveHeight * 0.9)
+  ctx.fillText("Impact", startX + gloveWidth * 0.8, startY + gloveHeight * 0.15)
 }
 
 function drawHeatSpots(
@@ -116,8 +116,8 @@ function drawHeatSpots(
   drawHeatSpot(ctx, middleX, middleY, middleForce)
 
   // Draw heat spot for impact sensor
-  const impactX = startX + gloveWidth * 0.5
-  const impactY = startY + gloveHeight * 0.8
+  const impactX = startX + gloveWidth * 0.9
+  const impactY = startY + gloveHeight * 0.5
   drawHeatSpot(ctx, impactX, impactY, impactForce)
 }
 
@@ -151,5 +151,5 @@ function drawHeatSpot(ctx: CanvasRenderingContext2D, x: number, y: number, inten
   ctx.font = "12px Arial"
   ctx.fillStyle = "#FFFFFF"
   ctx.textAlign = "center"
-  ctx.fillText(`${intensity}%`, x, y + radius + 15)
+  ctx.fillText(`${intensity}%`, x, y)
 }

@@ -189,6 +189,18 @@ export default function SettingsPage() {
                     />
                   </div>
 
+                  <div className="space-y-2">
+                    <Label htmlFor="age" className="text-white">
+                      Age
+                    </Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      defaultValue="22"
+                      className="border-gold/20 bg-black text-white focus-visible:ring-gold"
+                    />
+                  </div>
+
                   <div className="pt-4 flex justify-end">
                     <Button className="bg-gold text-black hover:bg-gold/90">Update Profile</Button>
                   </div>
