@@ -1,10 +1,14 @@
-import type { Metadata } from 'next'
-import './globals.css'
+import type React from "react"
+import "@/app/globals.css"
+import { Inter } from "next/font/google"
+import { ThemeProvider } from "@/components/theme-provider"
+import { SiteLayout } from "@/components/site-layout"
 
-export const metadata: Metadata = {
-  title: 'powerGlove App',
-  description: 'Created with the sweat and tears of undergrad students trying to make a MVP in 2 weeks',
-  generator: 'powerGlove.dev',
+const inter = Inter({ subsets: ["latin"] })
+
+export const metadata = {
+  title: "BoxSense - Boxing Glove Analysis System",
+  description: "Real-time boxing performance analysis with advanced sensor technology",
 }
 
 export default function RootLayout({
@@ -13,8 +17,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <SiteLayout>{children}</SiteLayout>
+        </ThemeProvider>
+      </body>
     </html>
   )
 }
