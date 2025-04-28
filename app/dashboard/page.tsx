@@ -138,7 +138,7 @@ export default function DashboardPage() {
           <CardContent>
             <ForceDistributionChart
               indexForce={data?.fsrIndex || 0}
-              middleForce={data?.fsrIndex || 0}
+              middleForce={data?.fsrMiddle || 0}
               impactForce={data?.fsrImpact || 0}
             />
           </CardContent>

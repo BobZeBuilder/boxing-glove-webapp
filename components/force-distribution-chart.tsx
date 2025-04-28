@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts"
 
 interface ForceDistributionChartProps {
@@ -32,19 +31,16 @@ export function ForceDistributionChart({ indexForce, middleForce, impactForce }:
       name: "Index Finger",
       current: indexForce,
       max: maxForceValues.index,
-      avg: Math.floor((indexForce + maxForceValues.index) / 2),
     },
     {
       name: "Middle Finger",
       current: middleForce,
       max: maxForceValues.middle,
-      avg: Math.floor((middleForce + maxForceValues.middle) / 2),
     },
     {
       name: "Impact Sensor",
       current: impactForce,
       max: maxForceValues.impact,
-      avg: Math.floor((impactForce + maxForceValues.impact) / 2),
     },
   ]
 
@@ -59,53 +55,26 @@ export function ForceDistributionChart({ indexForce, middleForce, impactForce }:
 
   return (
     <div className="w-full">
-      <div className="h-[300px] w-full">
-        <ChartContainer>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis dataKey="name" stroke="#999" tick={{ fill: "#999" }} />
-              <YAxis
-                domain={[0, 100]}
-                stroke="#999"
-                tick={{ fill: "#999" }}
-                label={{
-                  value: "Force (%)",
-                  angle: -90,
-                  position: "insideLeft",
-                  fill: "#999",
-                }}
-              />
-              <Tooltip
-                content={({ active, payload, label }) => {
-                  if (active && payload && payload.length) {
-                    return (
-                      <ChartTooltip>
-                        <ChartTooltipContent>
-                          <div className="flex flex-col">
-                            <span className="text-white font-bold">{label}</span>
-                            <span className="text-gold">Current: {payload[0].value}%</span>
-                            <span className="text-blue-400">Average: {payload[1].value}%</span>
-                            <span className="text-red-400">Max: {payload[2].value}%</span>
-                          </div>
-                        </ChartTooltipContent>
-                      </ChartTooltip>
-                    )
-                  }
-                  return null
-                }}
-              />
-              <Legend formatter={(value) => <span className="text-white">{value}</span>} />
-              <Bar dataKey="current" name="Current Force" isAnimationActive={false}>
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={getBarColor(entry.current)} />
-                ))}
-              </Bar>
-              <Bar dataKey="avg" name="Average Force" fill="#3b82f6" isAnimationActive={false} />
-              <Bar dataKey="max" name="Max Force" fill="#ef4444" isAnimationActive={false} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+      <div className="h-[300px] w-full bg-black border border-gold/20 rounded-md p-4">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+            <XAxis dataKey="name" stroke="#999" tick={{ fill: "#ffd700" }} />
+            <YAxis domain={[0, 100]} stroke="#999" tick={{ fill: "#ffd700" }} />
+            <Tooltip
+              contentStyle={{ backgroundColor: "#111", border: "1px solid #ffd700" }}
+              labelStyle={{ color: "#ffd700" }}
+              itemStyle={{ color: "#fff" }}
+            />
+            <Legend formatter={(value) => <span style={{ color: "#ffd700" }}>{value}</span>} />
+            <Bar dataKey="current" name="Current Force" isAnimationActive={false}>
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={getBarColor(entry.current)} />
+              ))}
+            </Bar>
+            <Bar dataKey="max" name="Max Force" fill="#ef4444" isAnimationActive={false} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mt-6">
