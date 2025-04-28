@@ -31,6 +31,11 @@ const navItems = [
     href: "/settings",
     icon: Settings,
   },
+  {
+  title: "Serial",
+    href: "/serial",
+    icon: Settings,
+  },
 ]
 
 export function MainNav() {
