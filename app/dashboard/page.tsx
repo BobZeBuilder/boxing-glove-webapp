@@ -12,7 +12,8 @@ import { useSensorData } from "@/hooks/use-sensor-data"
 export default function DashboardPage() {
   const { data, isConnected } = useSensorData()
   const [sessionTime, setSessionTime] = useState(0)
-
+  var totalPunches:number = 0;
+  totalPunches = totalPunches + (data?.punchCount || 0);
   useEffect(() => {
     let interval: NodeJS.Timeout
 
@@ -75,7 +76,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center">
-                <div className="text-4xl font-bold text-gold">{data?.punchCount || 0}</div>
+                <div className="text-4xl font-bold text-gold">{totalPunches}</div>
               </div>
             </CardContent>
           </Card>

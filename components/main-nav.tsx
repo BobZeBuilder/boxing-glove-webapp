@@ -37,7 +37,7 @@ export function MainNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="flex flex-col space-y-1">
+    <nav className="hidden md:flex items-center space-x-4">
       {navItems.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
         return (
@@ -45,7 +45,7 @@ export function MainNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+              "flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors",
               isActive ? "bg-gold text-black font-medium" : "text-white/70 hover:text-gold hover:bg-gold/10",
             )}
           >

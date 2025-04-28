@@ -48,7 +48,7 @@ export function MobileNav() {
           <span className="sr-only">Toggle menu</span>
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="bg-black border-gold/20 text-white">
+      <SheetContent side="bottom" className="bg-black border-gold/20 text-white">
         <div className="flex items-center justify-between border-b border-gold/20 pb-4">
           <div className="text-lg font-bold text-gold">BoxSense</div>
           <Button variant="ghost" onClick={() => setOpen(false)} className="text-white">
@@ -56,7 +56,7 @@ export function MobileNav() {
             <span className="sr-only">Close menu</span>
           </Button>
         </div>
-        <nav className="flex flex-col space-y-4 mt-6">
+        <nav className="grid grid-cols-2 gap-4 mt-6">
           {navItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
             return (
@@ -65,7 +65,7 @@ export function MobileNav() {
                 href={item.href}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
+                  "flex flex-col items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors",
                   isActive ? "bg-gold text-black font-medium" : "text-white/70 hover:text-gold hover:bg-gold/10",
                 )}
               >
