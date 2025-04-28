@@ -7,17 +7,16 @@ import { Activity, Dumbbell, BarChart3 } from "lucide-react"
 import { GloveHeatmap } from "@/components/glove-heatmap"
 import { HeartRateChart } from "@/components/heart-rate-chart"
 import { ForceDistributionChart } from "@/components/force-distribution-chart"
-import { useSensorData } from "@/hooks/use-sensor-data"
+import { useSerialData } from "@/hooks/use-serial-data"
 
 export default function DashboardPage() {
-  const { data, isConnected } = useSensorData()
+  const { data, connectionStatus } = useSerialData()
   const [sessionTime, setSessionTime] = useState(0)
   var totalPunches:number = 0;
-  totalPunches = totalPunches + (data?.punchCount || 0);
   useEffect(() => {
     let interval: NodeJS.Timeout
 
-    if (isConnected) {
+    if (connectionStatus) {
       interval = setInterval(() => {
         setSessionTime((prev) => prev + 1)
       }, 1000)
@@ -26,7 +25,7 @@ export default function DashboardPage() {
     return () => {
       if (interval) clearInterval(interval)
     }
-  }, [isConnected])
+  }, [connectionStatus])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -41,8 +40,8 @@ export default function DashboardPage() {
           <h1 className="text-xl font-bold text-gold">Performance Dashboard</h1>
           <div className="ml-auto flex items-center gap-4">
             <div className="flex h-8 items-center rounded-full bg-green-500/20 px-3">
-              <span className={`h-2 w-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`}></span>
-              <span className="ml-2 text-sm text-white">{isConnected ? "Connected" : "Disconnected"}</span>
+              <span className={`h-2 w-2 rounded-full ${connectionStatus ? "bg-green-500" : "bg-red-500"}`}></span>
+              <span className="ml-2 text-sm text-white">{connectionStatus ? "Connected" : "Disconnected"}</span>
             </div>
             <Button variant="outline" size="sm" className="border-gold/50 text-gold hover:bg-gold/10">
               Start Session
@@ -91,7 +90,7 @@ export default function DashboardPage() {
             <CardContent>
               <div className="flex items-center justify-center">
                 <div className="text-4xl font-bold text-gold">
-                  {Math.max(data?.force?.index || 0, data?.force?.middle || 0, data?.force?.impact || 0)}%
+                  {Math.max(data?.fsrIndex || 0, data?.fsrMiddle || 0, data?.fsrImpact || 0)}%
                 </div>
               </div>
             </CardContent>
@@ -106,9 +105,9 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="pt-2">
               <GloveHeatmap
-                indexForce={data?.force?.index || 0}
-                middleForce={data?.force?.middle || 0}
-                impactForce={data?.force?.impact || 0}
+                indexForce={data?.fsrIndex || 0}
+                middleForce={data?.fsrMiddle || 0}
+                impactForce={data?.fsrImpact || 0}
               />
             </CardContent>
           </Card>
@@ -117,11 +116,11 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="text-gold">Heart Rate</CardTitle>
               <CardDescription className="text-white/70">
-                Current: {data?.heartRate?.current || 0} BPM - Zone: {data?.heartRate?.zone || "Resting"}
+                Current: {data?.heartRate || 0} BPM - Zone: {data?.heartRate || "Resting"}
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <HeartRateChart heartRate={data?.heartRate?.current || 0} />
+              <HeartRateChart heartRate={data?.heartRate || 0} />
             </CardContent>
           </Card>
         </div>
@@ -133,9 +132,9 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <ForceDistributionChart
-              indexForce={data?.force?.index || 0}
-              middleForce={data?.force?.middle || 0}
-              impactForce={data?.force?.impact || 0}
+              indexForce={data?.fsrIndex || 0}
+              middleForce={data?.fsrIndex || 0}
+              impactForce={data?.fsrImpact || 0}
             />
           </CardContent>
         </Card>

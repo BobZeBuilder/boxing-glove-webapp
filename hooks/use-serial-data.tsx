@@ -204,6 +204,14 @@ export function useSerialData() {
     }
   }, [])
 
+  function getHeartRateZone(heartRate: number) {
+    if (heartRate < 60) return "Resting"
+    if (heartRate < 110) return "Warm Up"
+    if (heartRate < 140) return "Fat Burn"
+    if (heartRate < 170) return "Cardio"
+    return "Peak"
+  }
+
   return {
     data,
     rawMessages,
