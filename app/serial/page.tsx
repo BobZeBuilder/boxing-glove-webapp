@@ -11,11 +11,11 @@ import { ConnectionStatus } from "@/components/connection-status"
 import { SensorReadings } from "@/components/sensor-readings"
 import { RawDataViewer } from "@/components/raw-data-viewer"
 import { DebugPanel } from "@/components/debug-panel"
-import { useSerialData } from "@/hooks/use-serial-data"
+import { useSerial } from "@/components/providers/SerialProvider"
 
 export default function SerialMonitorPage() {
   const { toast } = useToast()
-  const { data, rawMessages, connectionStatus, error, connect, disconnect, toggleMockData } = useSerialData()
+  const { data, rawMessages, connectionStatus, error, connect, disconnect, toggleMockData } = useSerial()
 
   useEffect(() => {
     if (error) {

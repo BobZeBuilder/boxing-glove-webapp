@@ -1,131 +1,108 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
-interface SensorData {
-  force: {
-    index: number
-    middle: number
-    impact: number
+type SerialData = {
+  fsrIndex?: number
+  fsrMiddle?: number
+  fsrImpact?: number
+  accelerometer?: {
+    x: number
+    y: number
+    z: number
   }
-  heartRate: {
-    current: number
-    zone: string
-  }
-  movement: {
-    speed: number
-    acceleration: number
-    punchesDetected: number
-  }
-  punchCount: number
-  timestamp: string
+  heartRate?: number
+  confidence?: number
+  SpO2?: number
 }
 
-export function useSensorData() {
-  const [data, setData] = useState<SensorData | null>(null)
-  const [isConnected, setIsConnected] = useState(false)
+type ConnectionStatus = "connected" | "disconnected" | "error" | "connecting"
+
+export function useSerialData() {
+  const [data, setData] = useState<SerialData | null>(null)
+  const [rawMessages, setRawMessages] = useState<string[]>([])
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected")
   const [error, setError] = useState<string | null>(null)
+  const socketRef = useRef<WebSocket | null>(null)
 
+  // Helper to add raw message for debugging
+  function addRawMessage(type: string, message: string) {
+    const formatted = `[${type.toUpperCase()}] ${message}`
+    setRawMessages((prev) => [...prev.slice(-50), formatted]) // Keep last 50 messages
+  }
+
+  // Connect WebSocket
+  const connect = () => {
+    if (socketRef.current) {
+      socketRef.current.close()
+    }
+
+    setConnectionStatus("connecting")
+    setError(null)
+
+    const ws = new WebSocket("ws://localhost:3001")
+    socketRef.current = ws
+
+    ws.onopen = () => {
+      console.log("WebSocket connected")
+      setConnectionStatus("connected")
+      addRawMessage("status", "WebSocket connected")
+    }
+
+    ws.onmessage = (event: MessageEvent) => {
+      try {
+        const message = JSON.parse(event.data)
+
+        if (message.type === "data") {
+          setData(message.data)
+          addRawMessage("data", event.data)
+        } else if (message.type === "status") {
+          addRawMessage("status", message.message || "Status update")
+        }
+      } catch (err) {
+        console.error("Failed to parse WebSocket message:", err)
+        addRawMessage("error", "Failed to parse message")
+      }
+    }
+
+    ws.onerror = (event: Event) => {
+      console.error("WebSocket error:", event)
+      setConnectionStatus("error")
+      setError("WebSocket connection error")
+      addRawMessage("error", "WebSocket error")
+    }
+
+    ws.onclose = (event: CloseEvent) => {
+      console.warn("WebSocket closed:", event)
+      setConnectionStatus("disconnected")
+      addRawMessage("status", "WebSocket disconnected")
+    }
+  }
+
+  // Disconnect WebSocket
+  const disconnect = () => {
+    if (socketRef.current) {
+      socketRef.current.close()
+      socketRef.current = null
+    }
+    setConnectionStatus("disconnected")
+  }
+
+  // Toggle mock data via WebSocket
+  const toggleMockData = () => {
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({ type: "command", command: "toggleMock" }))
+    }
+  }
+
+  // Connect on first mount
   useEffect(() => {
-    // In a real implementation, this would connect to the backend
-    // For demo purposes, we'll generate mock data
-    let eventSource: EventSource | null = null
+    connect()
 
-    try {
-      // Try to connect to the real backend if available
-      const connectToRealBackend = () => {
-        try {
-          eventSource = new EventSource("http://localhost:3001/api/stream")
-
-          eventSource.onopen = () => {
-            setIsConnected(true)
-            setError(null)
-          }
-
-          eventSource.onmessage = (event) => {
-            try {
-              const parsedData = JSON.parse(event.data)
-              setData(parsedData)
-            } catch (err) {
-              console.error("Error parsing data:", err)
-            }
-          }
-
-          eventSource.onerror = () => {
-            eventSource?.close()
-            setIsConnected(false)
-            setError("Connection to sensor data failed")
-
-            // Fall back to mock data
-            startMockDataGeneration()
-          }
-        } catch (err) {
-          console.error("Failed to connect to backend:", err)
-          startMockDataGeneration()
-        }
-      }
-
-      // Generate mock data for demo purposes
-      const startMockDataGeneration = () => {
-        console.log("Using mock data generation")
-        setIsConnected(true)
-
-        const interval = setInterval(() => {
-          const mockData: SensorData = {
-            force: {
-              index: Math.floor(Math.random() * 100),
-              middle: Math.floor(Math.random() * 100),
-              impact: Math.floor(Math.random() * 100),
-            },
-            heartRate: {
-              current: Math.floor(120 + Math.random() * 60),
-              zone: getHeartRateZone(Math.floor(120 + Math.random() * 60)),
-            },
-            movement: {
-              speed: Math.floor(Math.random() * 30),
-              acceleration: Math.floor(Math.random() * 20),
-              punchesDetected: Math.floor(Math.random() * 5),
-            },
-            punchCount: data ? data.punchCount + Math.floor(Math.random() * 2) : Math.floor(Math.random() * 10),
-            timestamp: new Date().toISOString(),
-          }
-
-          setData(mockData)
-        }, 1000)
-
-        return interval
-      }
-
-      // Try to connect to real backend first
-      connectToRealBackend()
-
-      // If that fails, fall back to mock data
-      const mockInterval = setTimeout(() => {
-        if (!isConnected) {
-          startMockDataGeneration()
-        }
-      }, 3000)
-
-      return () => {
-        clearTimeout(mockInterval)
-        if (eventSource) {
-          eventSource.close()
-        }
-      }
-    } catch (err) {
-      console.error("Error in sensor data hook:", err)
-      setError("Failed to initialize sensor data connection")
-      setIsConnected(false)
+    return () => {
+      disconnect()
     }
   }, [])
 
-  function getHeartRateZone(heartRate: number) {
-    if (heartRate < 60) return "Resting"
-    if (heartRate < 110) return "Warm Up"
-    if (heartRate < 140) return "Fat Burn"
-    if (heartRate < 170) return "Cardio"
-    return "Peak"
-  }
-
-  return { data, isConnected, error }
+  return { data, rawMessages, connectionStatus, error, connect, disconnect, toggleMockData }
 }
