@@ -16,7 +16,7 @@ const clients = new Set()
 
 // Serial port configuration
 const PORT = process.env.PORT || 3001
-const SERIAL_PORT = process.env.SERIAL_PORT || "COM3" // Change this to match your Arduino port
+const SERIAL_PORT = process.env.SERIAL_PORT || "/dev/cu.usbmodem123456781" // Change this to match your Arduino port
 const BAUD_RATE = Number.parseInt(process.env.BAUD_RATE || "115200", 10)
 
 let serialPort

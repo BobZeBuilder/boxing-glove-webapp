@@ -34,32 +34,27 @@ export function HeartRateChart({ heartRate }: HeartRateChartProps) {
 
   // Update heart rate data
   useEffect(() => {
-    if (heartRate > 0) {
-      const now = new Date()
-      const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
-
-      // Determine heart rate zone
-      const percentage = (heartRate / maxHeartRate) * 100
-      let zone = "Rest"
-
-      if (percentage < 50) zone = "Rest"
-      else if (percentage < 60) zone = "Light"
-      else if (percentage < 70) zone = "Moderate"
-      else if (percentage < 80) zone = "Hard"
-      else zone = "Maximum"
-
-      // Update peak heart rate
-      if (heartRate > peakHeartRate) {
-        setPeakHeartRate(heartRate)
-      }
-
-      // Add new data point
-      setHeartRateData((prev) => {
-        const newData = [...prev, { time: timeStr, value: heartRate, zone }]
-        // Keep only the last 30 data points
-        return newData.slice(-30)
-      })
+    if (typeof window === "undefined" || heartRate <= 0) return
+  
+    const now = new Date()
+    const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
+  
+    const percentage = (heartRate / maxHeartRate) * 100
+    let zone = "Rest"
+    if (percentage < 50) zone = "Rest"
+    else if (percentage < 60) zone = "Light"
+    else if (percentage < 70) zone = "Moderate"
+    else if (percentage < 80) zone = "Hard"
+    else zone = "Maximum"
+  
+    if (heartRate > peakHeartRate) {
+      setPeakHeartRate(heartRate)
     }
+  
+    setHeartRateData((prev) => {
+      const newData = [...prev, { time: timeStr, value: heartRate, zone }]
+      return newData.slice(-30)
+    })
   }, [heartRate, maxHeartRate, peakHeartRate])
 
   // Pulse animation effect
@@ -199,6 +194,7 @@ export function HeartRateChart({ heartRate }: HeartRateChartProps) {
                     const zone = props.payload.zone
                     return (
                       <circle
+                        key={`dot-${props.index || props.payload.time}`}
                         cx={props.cx}
                         cy={props.cy}
                         r={4}
@@ -207,7 +203,7 @@ export function HeartRateChart({ heartRate }: HeartRateChartProps) {
                         strokeWidth={1}
                       />
                     )
-                  }}
+                  }}                  
                   activeDot={{ r: 6, fill: "#ffd700" }}
                 />
               </LineChart>

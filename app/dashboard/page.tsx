@@ -7,12 +7,18 @@ import { Activity, Dumbbell, BarChart3 } from "lucide-react"
 import { GloveHeatmap } from "@/components/glove-heatmap"
 import { HeartRateChart } from "@/components/heart-rate-chart"
 import { ForceDistributionChart } from "@/components/force-distribution-chart"
-import { useSerialData } from "@/hooks/use-serial-data"
+import { useSerial } from "@/components/providers/SerialProvider"
+import { usePunchDetection } from "@/hooks/use-punch-detection"
 
 export default function DashboardPage() {
-  const { data, rawMessages, connectionStatus, error, connect, disconnect, toggleMockData } = useSerialData()
+  const { data, rawMessages, connectionStatus, error, connect, disconnect, toggleMockData } = useSerial()
   const [sessionTime, setSessionTime] = useState(0)
+  const [age, setAge] = useState(25)
+  const [weight, setWeight] = useState(70)
+  const [gender, setGender] = useState<"male" | "female">("male")
+
   var totalPunches:number = 0;
+  const { punches, blocks, motionState } = usePunchDetection(data)
   useEffect(() => {
     let interval: NodeJS.Timeout
 
@@ -27,11 +33,43 @@ export default function DashboardPage() {
     }
   }, [connectionStatus])
 
+  useEffect(() => {
+    const stored = localStorage.getItem("userProfile")
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      if (parsed.age) setAge(parsed.age)
+      if (parsed.weight) setWeight(parsed.weight)
+      if (parsed.gender) setGender(parsed.gender)
+    }
+  }, [])
+  
+  useEffect(() => {
+    localStorage.setItem("userProfile", JSON.stringify({ age, weight, gender }))
+  }, [age, weight, gender])
+  
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
+
+  const calculateCaloriesBurned = (heartRate: number, durationSeconds: number): number => {
+    const minutes = durationSeconds / 60
+    const weightKg = weight * 0.453592 // convert lbs to kg
+  
+    const maleCalsPerMin =
+      (-55.0969 + 0.6309 * heartRate + 0.1988 * weightKg + 0.2017 * age) / 4.184
+  
+    const femaleCalsPerMin =
+      (-20.4022 + 0.4472 * heartRate - 0.1263 * weightKg + 0.074 * age) / 4.184
+  
+    const calsPerMin = gender === "male" ? maleCalsPerMin : femaleCalsPerMin
+    return Math.max(0, calsPerMin * minutes)
+  }
+  
+  
+
 
   return (
     <div className="flex min-h-screen flex-col bg-black">
@@ -51,6 +89,57 @@ export default function DashboardPage() {
       </header>
 
       <main className="flex-1 container py-8">
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Card className="border-gold/20 bg-black text-white">
+            <CardHeader>
+              <CardTitle className="text-gold">Age</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(parseInt(e.target.value))}
+                className="w-full bg-black border border-gold/50 text-white p-2 rounded-md"
+                min={10}
+                max={100}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="border-gold/20 bg-black text-white">
+            <CardHeader>
+              <CardTitle className="text-gold">Weight (lbs)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <input
+                type="number"
+                value={weight}
+                onChange={(e) => setWeight(parseFloat(e.target.value))}
+                className="w-full bg-black border border-gold/50 text-white p-2 rounded-md"
+                min={30}
+                max={200}
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="border-gold/20 bg-black text-white">
+            <CardHeader>
+              <CardTitle className="text-gold">Gender</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <select
+                value={gender}
+                onChange={(e) => setGender(e.target.value as "male" | "female")}
+                className="w-full bg-black border border-gold/50 text-white p-2 rounded-md"
+              >
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6">
           <Card className="border-gold/20 bg-black text-white">
             <CardHeader className="pb-2">
@@ -75,7 +164,35 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center">
-                <div className="text-4xl font-bold text-gold">{totalPunches}</div>
+                <div className="text-4xl font-bold text-gold">{punches}</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-gold/20 bg-black text-white">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-gold flex items-center gap-2">
+                 Blocks Detected
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center">
+                <div className="text-4xl font-bold text-gold">{blocks}</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-gold/20 bg-black text-white">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-gold flex items-center gap-2">
+                🏃 Motion State
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center">
+                <div className={`text-2xl font-semibold ${motionState === "active" ? "text-green-400" : "text-gray-400"}`}>
+                  {motionState === "active" ? "In Motion" : "Resting"}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -95,6 +212,22 @@ export default function DashboardPage() {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="border-gold/20 bg-black text-white">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-gold flex items-center gap-2">
+              🔥 Calories Burned
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center">
+              <div className="text-4xl font-bold text-gold">
+                {calculateCaloriesBurned(data?.heartRate || 0, sessionTime).toFixed(1)} kcal
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 mb-6">
