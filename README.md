@@ -3,6 +3,7 @@
 A clean, modular serial monitor UI for Arduino boxing glove sensors using Next.js and shadcn/ui components.
 
 ## Project Structure
+![image](https://github.com/user-attachments/assets/743b0023-c1f6-4b1a-88d3-0dceafcfe167)
 
 - `app/page.tsx` - Main dashboard page
 - `components/` - UI components for displaying sensor data
@@ -49,7 +50,9 @@ Open your browser and navigate to `http://localhost:3000`
 - **Connection Management**: Connect, disconnect, and monitor connection status
 
 ## Expected Arduino Data Format
+Arduino C++ serial monitor sent to a NodeJS server, which then was turned into a JSON Object to be used in the front end.
 
+This is the UI we have on the front end to make sure our data is being sent correctly
 The monitor expects JSON data from the Arduino in this format:
 
 \`\`\`json
@@ -65,6 +68,7 @@ The monitor expects JSON data from the Arduino in this format:
   },
 }
 \`\`\`
+![image](https://github.com/user-attachments/assets/c02b2989-d83e-4bce-be99-9e371660c4e3)
 
 ## Debugging Tips
 
